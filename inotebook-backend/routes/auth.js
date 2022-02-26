@@ -20,7 +20,7 @@ router.post("/createUser",
         body('password', "enter the valid length password").isLength({ min: 5 }),
     ],
     async (req, res) => {
-
+        let success=false;
         //if there are errors return bad error
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -69,7 +69,8 @@ router.post("/createUser",
             }
             const authToken = jwt.sign(data, SECRET_TOKEN);
             console.log(authToken)
-            res.json({ authToken });
+            success=true;
+            res.json({ success,authToken });
         }
         catch (error) {
             console.log(error.message);
@@ -85,7 +86,7 @@ router.post("/login",
         body('password', "enter the valid length password").isLength({ min: 5 }),
     ],
     async (req, res) => {
-
+        let success=false;
         //if there are errors return bad error
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -99,12 +100,12 @@ router.post("/login",
             const userExist = await User.findOne({ email: email });
             // console.log(userExist);
             if (!userExist) {
-                return res.status(400).json({ error: "PLEASE ENTER THE VALID LOGIN CREDENTIALS" });
+                return res.status(400).json({success:success, error: "PLEASE ENTER THE VALID LOGIN CREDENTIALS" });
             }
 
             const passwordCheck = await bcrypt.compare(password, userExist.password);
             if (!passwordCheck) {
-                return res.status(400).json({ error: "PLEASE ENTER THE VALID LOGIN CREDENTIALS" });
+                return res.status(400).json({success:success, error: "PLEASE ENTER THE VALID LOGIN CREDENTIALS" });
             }
 
             const payLoad = {
@@ -113,8 +114,9 @@ router.post("/login",
                 }
             }
             const authToken = jwt.sign(payLoad, SECRET_TOKEN);
+            success=true;
             console.log(authToken)
-            res.json({ authToken });
+            res.json({success, authToken });
         }
         catch (error) {
             console.log(error.message);
